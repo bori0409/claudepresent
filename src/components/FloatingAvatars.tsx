@@ -19,8 +19,9 @@ interface Token {
 }
 
 export default function FloatingAvatars({ participants }: { participants: Participant[] }) {
-  // a few copies each, thinning out as the room fills so it never overcrowds
-  const copies = participants.length <= 6 ? 3 : participants.length <= 12 ? 2 : 1
+  // one emoji per person — each floating avatar is a real human in the room,
+  // matching the "N here" count. (Bump `copies` for a scattered few-each look.)
+  const copies = 1
   const tokens: Token[] = participants.flatMap((p) =>
     Array.from({ length: copies }, (_, i) => ({ key: `${p.id}#${i}`, id: p.id, avatar: p.avatar })),
   )
