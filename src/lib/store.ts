@@ -1,5 +1,5 @@
 import { supabase, hasBackend, SESSION_CODE, isDemo } from './supabase'
-import type { Item, Phase, Session, VerdictRow, Axis, Source, Verdict } from './types'
+import type { Item, Phase, Session, VerdictRow, Axis, Source, Verdict, Participant } from './types'
 import { demoItems } from '../data/seed'
 
 /**
@@ -23,6 +23,16 @@ export interface Store {
   listVerdicts(): Promise<VerdictRow[]>
   onVerdicts(cb: () => void): () => void
   castVerdict(input: { item_id: string; participant_id: string; verdict: Verdict }): Promise<void>
+
+  listParticipants(sessionId: string): Promise<Participant[]>
+  onParticipants(sessionId: string, cb: () => void): () => void
+  upsertParticipant(input: {
+    id: string
+    session_id: string
+    name: string
+    avatar: string
+    done: boolean
+  }): Promise<void>
 }
 
 // ── Supabase-backed store ────────────────────────────────────────────────────
@@ -103,6 +113,46 @@ class SupabaseStore implements Store {
       .upsert(input, { onConflict: 'item_id,participant_id' })
     if (error) throw error
   }
+
+  async listParticipants(sessionId: string): Promise<Participant[]> {
+    const { data, error } = await supabase!
+      .from('participants')
+      .select('*')
+      .eq('session_id', sessionId)
+      .order('updated_at', { ascending: true })
+    if (error) throw error
+    return (data ?? []) as Participant[]
+  }
+
+  onParticipants(sessionId: string, cb: () => void) {
+    const ch = supabase!
+      .channel('participants')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'participants',
+          filter: `session_id=eq.${sessionId}`,
+        },
+        () => cb(),
+      )
+      .subscribe()
+    return () => void supabase!.removeChannel(ch)
+  }
+
+  async upsertParticipant(input: {
+    id: string
+    session_id: string
+    name: string
+    avatar: string
+    done: boolean
+  }) {
+    const { error } = await supabase!
+      .from('participants')
+      .upsert({ ...input, updated_at: new Date().toISOString() }, { onConflict: 'id' })
+    if (error) throw error
+  }
 }
 
 // ── Local store (localStorage + BroadcastChannel) ────────────────────────────
@@ -110,6 +160,7 @@ const LS = {
   session: 'foss-pulse:local:session',
   items: 'foss-pulse:local:items',
   verdicts: 'foss-pulse:local:verdicts',
+  participants: 'foss-pulse:local:participants',
 }
 
 function lsGet<T>(key: string, fallback: T): T {
@@ -155,11 +206,14 @@ class LocalStore implements Store {
     }
   }
 
-  private emit(topic: 'session' | 'items' | 'verdicts') {
+  private emit(topic: 'session' | 'items' | 'verdicts' | 'participants') {
     this.bus?.postMessage(topic)
   }
 
-  private listen(topic: 'session' | 'items' | 'verdicts', cb: (raw?: unknown) => void) {
+  private listen(
+    topic: 'session' | 'items' | 'verdicts' | 'participants',
+    cb: (raw?: unknown) => void,
+  ) {
     const onBus = (e: MessageEvent) => {
       if (e.data === topic) cb()
     }
@@ -231,6 +285,33 @@ class LocalStore implements Store {
     }
     lsSet(LS.verdicts, rows)
     this.emit('verdicts')
+  }
+
+  async listParticipants(): Promise<Participant[]> {
+    return lsGet<Participant[]>(LS.participants, [])
+  }
+
+  onParticipants(_sessionId: string, cb: () => void) {
+    return this.listen('participants', cb)
+  }
+
+  async upsertParticipant(input: {
+    id: string
+    session_id: string
+    name: string
+    avatar: string
+    done: boolean
+  }) {
+    const rows = lsGet<Participant[]>(LS.participants, [])
+    const now = new Date(2026, 7, 11, 9, 0, rows.length + 1).toISOString()
+    const idx = rows.findIndex((r) => r.id === input.id)
+    if (idx >= 0) {
+      rows[idx] = { ...rows[idx], ...input, updated_at: now }
+    } else {
+      rows.push({ ...input, updated_at: now })
+    }
+    lsSet(LS.participants, rows)
+    this.emit('participants')
   }
 }
 

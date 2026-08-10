@@ -184,6 +184,42 @@
 .live3__count strong {
   color: var(--accent);
 }
+/* live presence roster */
+.roster {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.roster__avatars {
+  display: inline-flex;
+}
+.roster__av {
+  width: clamp(28px, 2.4vw, 40px);
+  height: clamp(28px, 2.4vw, 40px);
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  border: 2px solid var(--bg-default);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(15px, 1.3vw, 22px);
+  margin-left: -8px;
+}
+.roster__av:first-child {
+  margin-left: 0;
+}
+.roster__av--done {
+  border-color: var(--answered);
+}
+.roster__count {
+  font-size: clamp(15px, 1.3vw, 20px);
+  color: var(--fg-muted);
+}
+.roster__count strong {
+  color: var(--answered);
+}
+
 .live3__works {
   display: flex;
   flex-wrap: wrap;

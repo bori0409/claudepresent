@@ -1,4 +1,4 @@
-import type { AggItem, Item, VerdictRow } from '../lib/types'
+import type { AggItem, Item, Participant, VerdictRow } from '../lib/types'
 
 /** The 12 real complaints — keep this wording exactly (spec §5). */
 export const ANNOY_CHIPS = [
@@ -63,6 +63,29 @@ export function demoItems(): Item[] {
     fakeItem('Fast first drafts to react to', 'works', 'chip'),
     fakeItem('Unblocks the blank page', 'works', 'free'),
   ]
+}
+
+/** Fake roster for ?demo=1 so the presence row + "wrapped up" count rehearse. */
+export function demoParticipants(): Participant[] {
+  const people: [string, string, boolean][] = [
+    ['Teal Otter', '🦦', true],
+    ['Clever Fox', '🦊', true],
+    ['Sunny Bee', '🐝', false],
+    ['Calm Turtle', '🐢', true],
+    ['Bold Owl', '🦉', false],
+    ['Merry Whale', '🐳', true],
+    ['Keen Penguin', '🐧', false],
+    ['Wry Sloth', '🦥', true],
+    ['Brave Hedgehog', '🦔', false],
+  ]
+  return people.map(([name, avatar, done], i) => ({
+    id: `demo-p-${i}`,
+    session_id: 'demo',
+    name,
+    avatar,
+    done,
+    updated_at: new Date(2026, 7, 11, 9, 0, i).toISOString(),
+  }))
 }
 
 /**

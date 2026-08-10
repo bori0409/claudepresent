@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { store } from './store'
-import type { Item, VerdictRow } from './types'
+import type { Item, Participant, VerdictRow } from './types'
 
 /** Live list of items for the session (empty until sessionId resolves). */
 export function useItems(sessionId: string | null): Item[] {
@@ -44,6 +44,29 @@ export function useVerdicts(enabled = true): VerdictRow[] {
       off()
     }
   }, [enabled])
+
+  return rows
+}
+
+/** Live roster of everyone who has joined this session. */
+export function useParticipants(sessionId: string | null): Participant[] {
+  const [rows, setRows] = useState<Participant[]>([])
+
+  useEffect(() => {
+    if (!sessionId) return
+    let alive = true
+    const refresh = () =>
+      store
+        .listParticipants(sessionId)
+        .then((r) => alive && setRows(r))
+        .catch((err) => console.error('[foss-pulse] participants load failed:', err))
+    refresh()
+    const off = store.onParticipants(sessionId, refresh)
+    return () => {
+      alive = false
+      off()
+    }
+  }, [sessionId])
 
   return rows
 }

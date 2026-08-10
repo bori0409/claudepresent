@@ -5,9 +5,10 @@
 -- ============================================================================
 
 -- Clean slate (order matters: children first) ---------------------------------
-drop table if exists verdicts cascade;
-drop table if exists items    cascade;
-drop table if exists sessions cascade;
+drop table if exists verdicts     cascade;
+drop table if exists items        cascade;
+drop table if exists participants cascade;
+drop table if exists sessions     cascade;
 
 -- Tables ----------------------------------------------------------------------
 create table sessions (
@@ -39,18 +40,32 @@ create table verdicts (
 );
 create index verdicts_item_idx on verdicts (item_id);
 
+-- People in the room: a cute avatar + editable name, and a soft "done" flag.
+-- Powers the live "who's here" roster and the "N of M wrapped up" count.
+create table participants (
+  id         text primary key,                      -- participant_id from the phone (localStorage)
+  session_id uuid not null references sessions(id) on delete cascade,
+  name       text not null,
+  avatar     text not null,                         -- emoji
+  done       boolean not null default false,
+  updated_at timestamptz not null default now()
+);
+create index participants_session_idx on participants (session_id);
+
 -- Realtime --------------------------------------------------------------------
 -- Add the tables to the realtime publication so the deck + phones sync live.
 alter publication supabase_realtime add table sessions;
 alter publication supabase_realtime add table items;
 alter publication supabase_realtime add table verdicts;
+alter publication supabase_realtime add table participants;
 
 -- Row level security ----------------------------------------------------------
 -- 12-person internal workshop on an unlisted URL. Permissive anon policies by
 -- design (spec §3). No permission system.
-alter table sessions enable row level security;
-alter table items    enable row level security;
-alter table verdicts enable row level security;
+alter table sessions     enable row level security;
+alter table items        enable row level security;
+alter table verdicts     enable row level security;
+alter table participants enable row level security;
 
 -- sessions: anyone may read; presenter (anon) may flip the phase.
 create policy sessions_select on sessions for select to anon using (true);
@@ -64,6 +79,11 @@ create policy items_insert on items for insert to anon with check (true);
 create policy verdicts_select on verdicts for select to anon using (true);
 create policy verdicts_insert on verdicts for insert to anon with check (true);
 create policy verdicts_update on verdicts for update to anon using (true) with check (true);
+
+-- participants: anyone may read the roster, join, and update their own row.
+create policy participants_select on participants for select to anon using (true);
+create policy participants_insert on participants for insert to anon with check (true);
+create policy participants_update on participants for update to anon using (true) with check (true);
 
 -- Seed the one session --------------------------------------------------------
 insert into sessions (code, phase) values ('FOSS', 'collect');

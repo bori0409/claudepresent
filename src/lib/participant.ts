@@ -1,4 +1,7 @@
+import { profileFromSeed, type Profile } from './identity'
+
 const PID_KEY = 'foss-pulse:pid'
+const PROFILE_KEY = 'foss-pulse:profile'
 
 /** Stable per-device id, used only to stop one person voting twice. */
 export function participantId(): string {
@@ -9,6 +12,28 @@ export function participantId(): string {
     localStorage.setItem(PID_KEY, pid)
   }
   return pid
+}
+
+/** This device's profile (cute name + avatar), generated once, then editable. */
+export function getProfile(): Profile {
+  if (typeof window === 'undefined') return { name: 'Someone', avatar: '🙂' }
+  const raw = localStorage.getItem(PROFILE_KEY)
+  if (raw) {
+    try {
+      const p = JSON.parse(raw) as Profile
+      if (p?.name && p?.avatar) return p
+    } catch {
+      /* fall through to regenerate */
+    }
+  }
+  const fresh = profileFromSeed(participantId())
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(fresh))
+  return fresh
+}
+
+export function saveProfile(profile: Profile) {
+  if (typeof window === 'undefined') return
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profile))
 }
 
 // ── Local guards (spec §5): remember what this device already added, so we can
@@ -33,8 +58,12 @@ function write(key: string, value: unknown) {
   localStorage.setItem(key, JSON.stringify(value))
 }
 
+function asArray(v: unknown): string[] {
+  return Array.isArray(v) ? (v as string[]) : []
+}
+
 export function addedChips(axis: AxisKey): string[] {
-  return read<Record<AxisKey, string[]>>(CHIP_KEY, { annoy: [], works: [] })[axis] ?? []
+  return asArray(read<Record<AxisKey, unknown>>(CHIP_KEY, { annoy: [], works: [] })[axis])
 }
 
 export function markChipAdded(axis: AxisKey, label: string) {
@@ -44,12 +73,12 @@ export function markChipAdded(axis: AxisKey, label: string) {
   write(CHIP_KEY, all)
 }
 
-export function freeCount(axis: AxisKey): number {
-  return read<Record<AxisKey, number>>(FREE_KEY, { annoy: 0, works: 0 })[axis] ?? 0
+export function addedFree(axis: AxisKey): string[] {
+  return asArray(read<Record<AxisKey, unknown>>(FREE_KEY, { annoy: [], works: [] })[axis])
 }
 
-export function bumpFreeCount(axis: AxisKey) {
-  const all = read<Record<AxisKey, number>>(FREE_KEY, { annoy: 0, works: 0 })
-  all[axis] = (all[axis] ?? 0) + 1
+export function markFreeAdded(axis: AxisKey, label: string) {
+  const all = { annoy: addedFree('annoy'), works: addedFree('works') }
+  all[axis] = [...all[axis], label]
   write(FREE_KEY, all)
 }

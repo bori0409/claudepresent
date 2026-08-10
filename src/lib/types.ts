@@ -27,6 +27,15 @@ export interface VerdictRow {
   created_at: string
 }
 
+export interface Participant {
+  id: string
+  session_id: string
+  name: string
+  avatar: string // emoji
+  done: boolean
+  updated_at: string
+}
+
 /** An item collapsed by label, with its occurrence count. */
 export interface AggItem {
   key: string // lowercased trimmed label

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSession } from '../lib/session-context'
-import { useItems, useVerdicts } from '../lib/hooks'
+import { useItems, useParticipants, useVerdicts } from '../lib/hooks'
 import { aggregate } from '../lib/aggregate'
 import { JOIN_URL, isDemo } from '../lib/supabase'
-import { demoItems, demoVerdicts } from '../data/seed'
+import { demoItems, demoParticipants, demoVerdicts } from '../data/seed'
 import type { Phase } from '../lib/types'
 import WordCloud from '../components/WordCloud'
 import ResultsBoard from '../components/ResultsBoard'
@@ -11,6 +11,7 @@ import QR from '../components/QR'
 import { Brief } from './Brief'
 import './deck.css'
 
+const RESULTS_INDEX = 9 // slide 10 (0-based) — the voting / results board
 const PHASE_ORDER: Phase[] = ['collect', 'closed', 'reflect', 'done']
 const PHASE_LABEL: Record<Phase, string> = {
   collect: 'Collect',
@@ -37,6 +38,10 @@ export default function Deck() {
   )
   const verdicts = isDemo ? dVerdicts : liveVerdicts
 
+  const liveParticipants = useParticipants(sessionId)
+  const dParticipants = useMemo(() => (isDemo ? demoParticipants() : []), [])
+  const participants = isDemo ? dParticipants : liveParticipants
+
   const [index, setIndex] = useState(0)
   const [cloudMode, setCloudMode] = useState<'cloud' | 'cards'>('cloud')
   const [armed, setArmed] = useState<Phase | null>(null) // phase switch awaiting confirm
@@ -45,11 +50,18 @@ export default function Deck() {
   const toastTimer = useRef<number | null>(null)
 
   const slides = useMemo(
-    () =>
-      buildSlides({ items, verdicts, cloudMode, phase, backendError }),
-    [items, verdicts, cloudMode, phase, backendError],
+    () => buildSlides({ items, verdicts, participants, cloudMode, phase, backendError }),
+    [items, verdicts, participants, cloudMode, phase, backendError],
   )
   const N = slides.length
+
+  // Auto-reveal voting: landing on the results slide flips phones into reflect.
+  // Runs once per arrival (dep is index only), so a manual phase change while
+  // sitting on the slide isn't fought.
+  useEffect(() => {
+    if (index === RESULTS_INDEX) void setPhase('reflect')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index])
 
   const flashToast = useCallback((msg: string) => {
     setToast(msg)
@@ -178,14 +190,16 @@ export default function Deck() {
 function buildSlides(ctx: {
   items: ReturnType<typeof useItems>
   verdicts: ReturnType<typeof useVerdicts>
+  participants: ReturnType<typeof useParticipants>
   cloudMode: 'cloud' | 'cards'
   phase: Phase
   backendError: boolean
 }) {
-  const { items, verdicts, cloudMode, backendError } = ctx
+  const { items, verdicts, participants, cloudMode, backendError } = ctx
   const total = items.length
   const distinct = aggregate(items, 'annoy').length
   const works = aggregate(items, 'works').slice(0, 6)
+  const doneCount = participants.filter((p) => p.done).length
 
   return [
     // 1 — Title
@@ -235,6 +249,23 @@ function buildSlides(ctx: {
               'Waiting for the room…'
             )}
           </p>
+          {participants.length > 0 && (
+            <div className="roster">
+              <span className="roster__avatars" aria-hidden="true">
+                {participants.slice(0, 14).map((p) => (
+                  <span key={p.id} className={`roster__av ${p.done ? 'roster__av--done' : ''}`}>
+                    {p.avatar}
+                  </span>
+                ))}
+              </span>
+              <span className="roster__count">
+                {participants.length} here
+                {doneCount > 0 && (
+                  <> · <strong>{doneCount}</strong> wrapped up</>
+                )}
+              </span>
+            </div>
+          )}
           {works.length > 0 && (
             <div className="live3__works">
               <span className="live3__workslabel">Also working well</span>

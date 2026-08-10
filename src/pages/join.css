@@ -6,16 +6,136 @@
 }
 
 .join__brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   font-weight: 700;
   letter-spacing: 0.14em;
   font-size: 12px;
   color: var(--fg-faint);
-  padding: 14px 20px;
+  padding: 12px 18px;
   border-bottom: 1px solid var(--outline);
   position: sticky;
   top: 0;
   background: var(--bg-default);
   z-index: 2;
+}
+
+/* ── Presence: who else is here ───────────────────────────────────────────── */
+.presence {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: normal;
+}
+.presence__stack {
+  display: inline-flex;
+}
+.presence__av {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--bg-default);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  margin-left: -6px;
+}
+.presence__av:first-child {
+  margin-left: 0;
+}
+.presence__count {
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+
+/* ── Identity bar (you) ───────────────────────────────────────────────────── */
+.idbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 18px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-interactive);
+  text-align: left;
+}
+.idbar__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--bg-default);
+  border: 1px solid var(--outline-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex: none;
+}
+.idbar__name {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--fg-primary);
+  flex: 1;
+}
+.idbar__edit {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fg-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.idedit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.idedit__avatar {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--outline-strong);
+  font-size: 22px;
+  flex: none;
+}
+.idedit__reroll {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  font-size: 12px;
+  background: var(--bg-default);
+  border-radius: 999px;
+  padding: 1px;
+}
+.idedit__input {
+  flex: 1;
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--fg-primary);
+  background: var(--bg-default);
+  border: 1px solid var(--outline-strong);
+  border-radius: var(--radius-interactive);
+}
+.idedit__save {
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-interactive);
 }
 
 .join__body {
@@ -86,6 +206,54 @@
   font-size: 13px;
 }
 
+/* ── Your own entries, accumulating as tags ───────────────────────────────── */
+.mine {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.minetag {
+  font-size: 14px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: var(--radius-interactive);
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+.minetag--chip {
+  background: var(--bg-elevated);
+  color: var(--fg-primary);
+  border-color: var(--outline-strong);
+}
+.axis--works .minetag {
+  background: var(--answered-soft);
+  color: var(--answered);
+  border-color: var(--answered);
+}
+.axis--works .minetag--chip {
+  background: var(--bg-elevated);
+  color: var(--fg-primary);
+  border-color: var(--outline-strong);
+}
+
+/* ── "Not sure?" disclosure ───────────────────────────────────────────────── */
+.notsure {
+  margin-top: 14px;
+  background: none;
+  border: none;
+  padding: 8px 0;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fg-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /* ── Free text ────────────────────────────────────────────────────────────── */
 .free {
   margin-top: 14px;
@@ -128,6 +296,25 @@
   color: var(--fg-faint);
   font-size: 12px;
   margin-top: 6px;
+}
+
+/* ── Done for now (soft signal) ───────────────────────────────────────────── */
+.donebtn {
+  width: 100%;
+  min-height: 48px;
+  margin: 6px 0 8px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--fg-primary);
+  background: var(--bg-default);
+  border: 1.5px solid var(--outline-strong);
+  border-radius: var(--radius-interactive);
+}
+.donebtn--on {
+  color: #fff;
+  background: var(--answered);
+  border-color: var(--answered);
 }
 
 /* ── Running count + hints ────────────────────────────────────────────────── */
