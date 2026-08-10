@@ -183,6 +183,7 @@ function lsSet(key: string, value: unknown) {
 
 // Monotonic-ish id without Date.now()/Math.random() reliance for stability.
 let localSeq = 0
+let touchSeq = 0
 function localId(prefix: string) {
   localSeq += 1
   const n = lsGet<number>('foss-pulse:local:seq', 0) + 1
@@ -309,7 +310,8 @@ class LocalStore implements Store {
     done: boolean
   }) {
     const rows = lsGet<Participant[]>(LS.participants, [])
-    const now = new Date(2026, 7, 11, 9, 0, rows.length + 1).toISOString()
+    // ms param increments every write so updated_at always changes → hop fires
+    const now = new Date(2026, 7, 11, 9, 0, 0, ++touchSeq).toISOString()
     const idx = rows.findIndex((r) => r.id === input.id)
     if (idx >= 0) {
       rows[idx] = { ...rows[idx], ...input, updated_at: now }

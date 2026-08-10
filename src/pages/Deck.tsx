@@ -7,6 +7,7 @@ import { demoItems, demoParticipants, demoVerdicts } from '../data/seed'
 import type { Phase } from '../lib/types'
 import WordCloud from '../components/WordCloud'
 import ResultsBoard from '../components/ResultsBoard'
+import FloatingAvatars from '../components/FloatingAvatars'
 import QR from '../components/QR'
 import { Brief } from './Brief'
 import './deck.css'
@@ -155,6 +156,9 @@ export default function Deck() {
         {slides[index]}
       </div>
 
+      {/* Ambient floating crowd along the bottom of the collect slide */}
+      {index === 2 && <FloatingAvatars participants={participants} />}
+
       {/* presenter HUD — low-contrast, visible to presenter, invisible to the room */}
       <div className="deck__progress" style={{ width: `${((index + 1) / N) * 100}%` }} />
       <div className="deck__num">
@@ -242,13 +246,6 @@ function buildSlides(ctx: {
           </p>
           {participants.length > 0 && (
             <div className="roster">
-              <span className="roster__avatars" aria-hidden="true">
-                {participants.slice(0, 14).map((p) => (
-                  <span key={p.id} className={`roster__av ${p.done ? 'roster__av--done' : ''}`}>
-                    {p.avatar}
-                  </span>
-                ))}
-              </span>
               <span className="roster__count">
                 {participants.length} here
                 {doneCount > 0 && (

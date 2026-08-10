@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSession } from '../lib/session-context'
 import { useItems, useParticipants, useVerdicts } from '../lib/hooks'
 import { store } from '../lib/store'
@@ -51,6 +51,20 @@ export default function Join() {
     saveProfile(p)
   }
 
+  // "Touch" our presence row so the deck hops this person's avatar on activity.
+  function touch() {
+    if (!sessionId) return
+    store
+      .upsertParticipant({
+        id: pid,
+        session_id: sessionId,
+        name: profile.name,
+        avatar: profile.avatar,
+        done,
+      })
+      .catch(() => {})
+  }
+
   const showIdentity = phase === 'collect' || phase === 'reflect'
 
   return (
@@ -68,6 +82,7 @@ export default function Join() {
               everyone={items.length}
               done={done}
               onToggleDone={() => setDone((d) => !d)}
+              onActivity={touch}
             />
           )}
           {phase === 'closed' && <Closed />}
@@ -198,11 +213,13 @@ function Collect({
   everyone,
   done,
   onToggleDone,
+  onActivity,
 }: {
   sessionId: string | null
   everyone: number
   done: boolean
   onToggleDone: () => void
+  onActivity: () => void
 }) {
   // one merged list of this device's entries per axis, in the order they were added
   const [mine, setMine] = useState<Record<Axis, Entry[]>>(() => ({
@@ -223,6 +240,7 @@ function Collect({
     markChipAdded(axis, label)
     setMine((m) => ({ ...m, [axis]: [...m[axis], { label, source: 'chip' }] }))
     void store.addItem(sessionId, { label, source: 'chip', axis })
+    onActivity()
   }
 
   function addFree(axis: Axis, label: string) {
@@ -232,6 +250,7 @@ function Collect({
     markFreeAdded(axis, clean)
     setMine((m) => ({ ...m, [axis]: [...m[axis], { label: clean, source: 'free' }] }))
     void store.addItem(sessionId, { label: clean, source: 'free', axis })
+    onActivity()
   }
 
   return (
@@ -304,6 +323,7 @@ function CollectAxis({
 }) {
   const [text, setText] = useState('')
   const [showChips, setShowChips] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const freeUsed = entries.filter((e) => e.source === 'free').length
   const freeLeft = MAX_FREE - freeUsed
@@ -335,10 +355,13 @@ function CollectAxis({
           if (!canSubmit) return
           onFree(text)
           setText('')
+          // keep focus so they can add another without tapping the field again
+          if (freeLeft - 1 > 0) inputRef.current?.focus()
         }}
       >
         <div className="free__row">
           <input
+            ref={inputRef}
             className="free__input"
             type="text"
             inputMode="text"

@@ -10,6 +10,7 @@
   position: absolute;
   inset: 0;
   display: flex;
+  z-index: 1; /* keep slide content above the ambient floaters */
 }
 @media (prefers-reduced-motion: no-preference) {
   .deck__stage {
