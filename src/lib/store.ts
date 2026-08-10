@@ -35,6 +35,12 @@ export interface Store {
   }): Promise<void>
 }
 
+// Unique channel names per subscription — reusing a name collides with an
+// already-subscribed channel (throws "cannot add callbacks after subscribe()"),
+// which happens under React StrictMode's double-mount.
+let channelSeq = 0
+const chan = (base: string) => `${base}-${++channelSeq}`
+
 // ── Supabase-backed store ────────────────────────────────────────────────────
 class SupabaseStore implements Store {
   readonly kind = 'supabase' as const
@@ -51,7 +57,7 @@ class SupabaseStore implements Store {
 
   onSession(cb: (s: Session) => void) {
     const ch = supabase!
-      .channel('sessions')
+      .channel(chan('sessions'))
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'sessions' },
@@ -78,7 +84,7 @@ class SupabaseStore implements Store {
 
   onItems(sessionId: string, cb: () => void) {
     const ch = supabase!
-      .channel('items')
+      .channel(chan('items'))
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'items', filter: `session_id=eq.${sessionId}` },
@@ -101,7 +107,7 @@ class SupabaseStore implements Store {
 
   onVerdicts(cb: () => void) {
     const ch = supabase!
-      .channel('verdicts')
+      .channel(chan('verdicts'))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'verdicts' }, () => cb())
       .subscribe()
     return () => void supabase!.removeChannel(ch)
@@ -126,7 +132,7 @@ class SupabaseStore implements Store {
 
   onParticipants(sessionId: string, cb: () => void) {
     const ch = supabase!
-      .channel('participants')
+      .channel(chan('participants'))
       .on(
         'postgres_changes',
         {
