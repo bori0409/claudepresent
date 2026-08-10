@@ -1,0 +1,116 @@
+/* ── Word cloud ───────────────────────────────────────────────────────────── */
+.wc {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.35em 0.7em;
+}
+
+.wc--cloud {
+  /* responsive base size — per-word em multipliers scale off this */
+  font-size: clamp(15px, 1.05vw + 0.35rem, 24px);
+  line-height: 1.45;
+  align-content: center;
+}
+
+.wc__word {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.28em;
+  color: var(--fg-primary);
+  white-space: nowrap;
+}
+
+.wc__label {
+  font-weight: 700;
+}
+
+/* hand-typed items — the interesting ones, findable at a glance */
+.wc__word--free .wc__label {
+  color: var(--accent);
+  font-style: italic;
+  font-weight: 700;
+}
+
+.wc__count {
+  font-size: 0.5em;
+  font-weight: 400;
+  color: var(--fg-faint);
+  transform: translateY(-0.35em);
+}
+
+/* entry animation — fade + slight scale, honoured only when motion is allowed */
+@media (prefers-reduced-motion: no-preference) {
+  .wc__word--enter {
+    animation: wc-in 200ms ease-out both;
+  }
+}
+@keyframes wc-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* empty placeholders */
+.wc--empty .wc__placeholder {
+  opacity: 0.18;
+  font-weight: 700;
+  font-size: 1.6em;
+}
+
+/* ── Card-wall mode ───────────────────────────────────────────────────────── */
+.wc--cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.wc--cards .wc__word {
+  justify-content: space-between;
+  white-space: normal;
+  background: var(--bg-default);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-surface);
+  padding: 0.7rem 0.9rem;
+  font-size: clamp(15px, 1vw + 0.4rem, 20px);
+  box-shadow: var(--shadow-elevated);
+}
+
+.wc--cards .wc__word--free {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.wc--cards .wc__label {
+  font-weight: 700;
+}
+
+.wc--cards .wc__count {
+  font-size: 0.85em;
+  transform: none;
+  min-width: 1.6em;
+  height: 1.6em;
+  padding: 0 0.4em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--fg-primary);
+  color: var(--bg-default);
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.wc--cards .wc__word--free .wc__count {
+  background: var(--accent);
+  color: var(--accent-ink);
+}

@@ -1,0 +1,239 @@
+.join {
+  min-height: 100%;
+  background: var(--bg-default);
+  display: flex;
+  flex-direction: column;
+}
+
+.join__brand {
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  font-size: 12px;
+  color: var(--fg-faint);
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--outline);
+  position: sticky;
+  top: 0;
+  background: var(--bg-default);
+  z-index: 2;
+}
+
+.join__body {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px 18px 96px;
+  flex: 1;
+}
+
+/* ── Collect axis ─────────────────────────────────────────────────────────── */
+.axis {
+  margin-bottom: 34px;
+}
+.axis--works {
+  border-top: 1px solid var(--outline);
+  padding-top: 26px;
+}
+
+.axis__h {
+  font-size: 24px;
+  line-height: 1.12;
+  margin-bottom: 6px;
+}
+.axis--works .axis__h {
+  font-size: 20px;
+  color: var(--fg-primary);
+}
+
+.axis__sub {
+  color: var(--fg-muted);
+  font-size: 15px;
+  margin: 0 0 16px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  min-height: 44px;
+  padding: 10px 14px;
+  font-size: 15px;
+  border: 1px solid var(--outline-strong);
+  background: var(--bg-elevated);
+  color: var(--fg-primary);
+  border-radius: var(--radius-interactive);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 120ms ease, border-color 120ms ease, transform 80ms ease;
+}
+.chip:active {
+  transform: scale(0.97);
+}
+.chip--on {
+  background: var(--fg-primary);
+  border-color: var(--fg-primary);
+  color: var(--bg-default);
+}
+.axis--works .chip--on {
+  background: var(--answered);
+  border-color: var(--answered);
+}
+.chip__tick {
+  font-size: 13px;
+}
+
+/* ── Free text ────────────────────────────────────────────────────────────── */
+.free {
+  margin-top: 14px;
+}
+.free__row {
+  display: flex;
+  gap: 8px;
+}
+.free__input {
+  flex: 1;
+  min-height: 48px;
+  padding: 12px 14px;
+  font-size: 16px; /* >=16px so iOS Safari doesn't zoom on focus */
+  font-family: inherit;
+  color: var(--fg-primary);
+  background: var(--bg-default);
+  border: 1px solid var(--outline-strong);
+  border-radius: var(--radius-interactive);
+}
+.free__input:disabled {
+  background: var(--bg-elevated);
+  color: var(--fg-faint);
+}
+.free__submit {
+  min-height: 48px;
+  padding: 0 18px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-interactive);
+}
+.free__submit:disabled {
+  opacity: 0.4;
+}
+.free__meta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--fg-faint);
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* ── Running count + hints ────────────────────────────────────────────────── */
+.join__count {
+  font-size: 15px;
+  color: var(--fg-primary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-surface);
+  padding: 12px 14px;
+  margin: 4px 0 10px;
+}
+.join__hint {
+  color: var(--fg-faint);
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+/* ── Holding screens ──────────────────────────────────────────────────────── */
+.hold {
+  padding: 48px 4px;
+}
+.hold__h {
+  font-size: 26px;
+  margin-bottom: 10px;
+}
+.hold__p {
+  color: var(--fg-muted);
+  font-size: 16px;
+  margin: 0;
+}
+
+/* ── Reflect list ─────────────────────────────────────────────────────────── */
+.rlist {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.rrow {
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-surface);
+  background: var(--bg-elevated);
+  padding: 12px;
+}
+.rrow__label {
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rrow__count {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--fg-faint);
+  border: 1px solid var(--outline);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+.rrow__btns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.vbtn {
+  min-height: 44px;
+  padding: 8px 4px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: var(--radius-interactive);
+  border: 1px solid var(--outline-strong);
+  background: var(--bg-default);
+  color: var(--fg-muted);
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.vbtn--on.vbtn--answered {
+  background: var(--answered);
+  border-color: var(--answered);
+  color: #fff;
+}
+.vbtn--on.vbtn--partly {
+  background: var(--partly);
+  border-color: var(--partly);
+  color: #fff;
+}
+.vbtn--on.vbtn--not {
+  background: var(--not);
+  border-color: var(--not);
+  color: #fff;
+}
+
+/* ── Sticky progress ──────────────────────────────────────────────────────── */
+.rprogress {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--fg-primary);
+  color: var(--bg-default);
+  text-align: center;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 14px;
+  z-index: 3;
+}
