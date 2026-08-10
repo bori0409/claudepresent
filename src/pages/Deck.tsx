@@ -11,7 +11,6 @@ import QR from '../components/QR'
 import { Brief } from './Brief'
 import './deck.css'
 
-const RESULTS_INDEX = 9 // slide 10 (0-based) — the voting / results board
 const PHASE_ORDER: Phase[] = ['collect', 'closed', 'reflect', 'done']
 const PHASE_LABEL: Record<Phase, string> = {
   collect: 'Collect',
@@ -54,14 +53,6 @@ export default function Deck() {
     [items, verdicts, participants, cloudMode, phase, backendError],
   )
   const N = slides.length
-
-  // Auto-reveal voting: landing on the results slide flips phones into reflect.
-  // Runs once per arrival (dep is index only), so a manual phase change while
-  // sitting on the slide isn't fought.
-  useEffect(() => {
-    if (index === RESULTS_INDEX) void setPhase('reflect')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index])
 
   const flashToast = useCallback((msg: string) => {
     setToast(msg)
