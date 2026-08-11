@@ -205,6 +205,36 @@ export default function Deck() {
   )
 }
 
+// ── Break countdown ──────────────────────────────────────────────────────────
+// Counts down from `minutes` when the slide mounts (navigating back restarts it).
+function BreakTimer({ minutes = 7 }: { minutes?: number }) {
+  const [remaining, setRemaining] = useState(minutes * 60)
+
+  useEffect(() => {
+    const end = Date.now() + minutes * 60 * 1000
+    const tick = () => setRemaining(Math.max(0, Math.round((end - Date.now()) / 1000)))
+    tick()
+    const id = window.setInterval(tick, 250)
+    return () => window.clearInterval(id)
+  }, [minutes])
+
+  const done = remaining === 0
+  const mm = Math.floor(remaining / 60)
+  const ss = remaining % 60
+
+  return (
+    <div className="brk">
+      <p className="brk__label">Break</p>
+      <p className={`brk__time ${done ? 'brk__time--done' : ''}`}>
+        {done ? 'Time' : `${mm}:${String(ss).padStart(2, '0')}`}
+      </p>
+      <p className="brk__note">
+        {done ? 'Grab a laptop — let’s make something.' : 'Back in a few. Then we make things.'}
+      </p>
+    </div>
+  )
+}
+
 // ── Slide construction ───────────────────────────────────────────────────────
 function buildSlides(ctx: {
   items: ReturnType<typeof useItems>
@@ -330,6 +360,11 @@ function buildSlides(ctx: {
       <Brief />
     </Slide>,
 
+    // Break — refresh, then go make things
+    <Slide key="s-break" center>
+      <BreakTimer minutes={7} />
+    </Slide>,
+
     // 9 — Share-back
     <Slide key="s9">
       <h2 className="h">What surprised you · what fell flat · what did you have to fight it on</h2>
@@ -363,13 +398,10 @@ function buildSlides(ctx: {
       </ul>
     </Slide>,
 
-    // 12 — One next step
+    // 12 — Close: thank you + open discussion
     <Slide key="s12" center>
-      <p className="kicker">One next step</p>
-      <h2 className="h">The Supplier Portal assets get finished and published.</h2>
-      <p className="body">
-        Then we read portal adoption in the SQ dashboard and see if it moved.
-      </p>
+      <h2 className="h">Thank you.</h2>
+      <p className="lede">Open floor — what did today change, and what do we take further?</p>
     </Slide>,
   ]
 }

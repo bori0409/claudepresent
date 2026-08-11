@@ -55,8 +55,8 @@ const SVG = `
   <!-- STAGE 2 · the portal, included and free -->
   <g class="st" data-from="2">
     <rect x="72" y="326" width="272" height="52" rx="12" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/>
-    <text x="94" y="349" class="d-tag">Included · free for suppliers</text>
-    <text x="94" y="369" class="d-lbl" style="font-size:16px">Supplier Portal</text>
+    <text x="94" y="349" class="d-tag">Free for suppliers</text>
+    <text x="94" y="369" class="d-lbl" style="font-size:16px">Supplier Portal · included</text>
   </g>
 
   <!-- STAGE 3 · the turn: it's for THEIR suppliers -->
