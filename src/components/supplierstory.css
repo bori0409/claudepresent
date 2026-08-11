@@ -1,0 +1,124 @@
+.ss {
+  /* aliases so the ported SVG token names resolve to the deck's palette */
+  --fg-secondary: var(--fg-muted);
+  --fg-tertiary: var(--fg-faint);
+  --accent-wash: var(--accent-soft);
+
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.5vh, 32px);
+}
+
+.ss__diagram svg {
+  width: 100%;
+  height: auto;
+  max-height: 60vh;
+  display: block;
+  overflow: visible;
+}
+
+/* ── SVG text styles ──────────────────────────────────────────────────────── */
+.d-tag {
+  font: 700 13px 'Lexend', sans-serif;
+  fill: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.d-h {
+  font: 700 23px 'Lexend', sans-serif;
+  fill: var(--fg-primary);
+  letter-spacing: -0.01em;
+}
+.d-lbl {
+  font: 700 18px 'Lexend', sans-serif;
+  fill: var(--fg-primary);
+}
+.d-mod {
+  font: 400 15px 'Lexend', sans-serif;
+  fill: var(--fg-muted);
+}
+.d-sub {
+  font: 400 14px 'Lexend', sans-serif;
+  fill: var(--fg-faint);
+}
+.d-bub {
+  font: 400 15.5px 'Lexend', sans-serif;
+  fill: var(--fg-primary);
+}
+.d-x {
+  font: 700 12px 'Lexend', sans-serif;
+  fill: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.d-chip rect {
+  fill: var(--bg-default);
+  stroke: var(--outline);
+}
+
+/* ── Staged reveal: fade + rise, arrows draw themselves in ────────────────── */
+.ss__diagram .st {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.ss__diagram .st.on {
+  opacity: 1;
+  transform: none;
+}
+.ss__diagram .d-flow {
+  stroke-dasharray: 900;
+  stroke-dashoffset: 900;
+}
+.ss__diagram .st.on .d-flow {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.8s ease 0.15s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ss__diagram .st {
+    transition: none;
+  }
+  .ss__diagram .d-flow {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ── Caption + progress dots ──────────────────────────────────────────────── */
+.ss__cap {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(16px, 2vw, 28px);
+  min-height: 3.4em;
+}
+.ss__dots {
+  display: flex;
+  gap: 8px;
+  padding-top: 0.55em;
+  flex-shrink: 0;
+}
+.ss__dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--outline);
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+.ss__dots i.on {
+  background: var(--accent);
+  transform: scale(1.1);
+}
+.ss__text {
+  margin: 0;
+  font-size: clamp(20px, 2vw, 30px);
+  font-weight: 300;
+  line-height: 1.3;
+  color: var(--fg-muted);
+  max-width: 48ch;
+}
+.ss__text b {
+  font-weight: 700;
+  color: var(--fg-primary);
+}

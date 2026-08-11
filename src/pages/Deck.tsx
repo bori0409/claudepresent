@@ -8,9 +8,15 @@ import type { Phase } from '../lib/types'
 import WordCloud from '../components/WordCloud'
 import ResultsBoard from '../components/ResultsBoard'
 import FloatingAvatars from '../components/FloatingAvatars'
+import SupplierStory, { SUPPLIER_STAGES } from '../components/SupplierStory'
 import QR from '../components/QR'
 import { Brief } from './Brief'
 import './deck.css'
+
+// The animated Supplier Portal diagram sits at this slide index and reveals in
+// stages before the deck moves on.
+const DIAGRAM_INDEX = 4
+const stagesFor = (i: number) => (i === DIAGRAM_INDEX ? SUPPLIER_STAGES : 0)
 
 const PHASE_ORDER: Phase[] = ['collect', 'closed', 'reflect', 'done']
 const PHASE_LABEL: Record<Phase, string> = {
@@ -43,6 +49,7 @@ export default function Deck() {
   const participants = isDemo ? dParticipants : liveParticipants
 
   const [index, setIndex] = useState(0)
+  const [stage, setStage] = useState(1) // sub-step within a staged slide
   const [cloudMode, setCloudMode] = useState<'cloud' | 'cards'>('cloud')
   const [armed, setArmed] = useState<Phase | null>(null) // phase switch awaiting confirm
   const [goto, setGoto] = useState<string | null>(null) // digit buffer
@@ -50,8 +57,8 @@ export default function Deck() {
   const toastTimer = useRef<number | null>(null)
 
   const slides = useMemo(
-    () => buildSlides({ items, verdicts, participants, cloudMode, phase, backendError }),
-    [items, verdicts, participants, cloudMode, phase, backendError],
+    () => buildSlides({ items, verdicts, participants, cloudMode, phase, backendError, stage }),
+    [items, verdicts, participants, cloudMode, phase, backendError, stage],
   )
   const N = slides.length
 
@@ -92,7 +99,10 @@ export default function Deck() {
         }
         if (e.key === 'Enter') {
           const n = parseInt(goto || '0', 10)
-          if (n >= 1 && n <= N) go(n - 1)
+          if (n >= 1 && n <= N) {
+            go(n - 1)
+            setStage(1)
+          }
           setGoto(null)
           e.preventDefault()
           return
@@ -107,15 +117,28 @@ export default function Deck() {
       switch (e.key) {
         case 'ArrowRight':
         case ' ':
-        case 'PageDown':
-          go(index + 1)
+        case 'PageDown': {
+          const tot = stagesFor(index)
+          if (tot && stage < tot) setStage((s) => s + 1)
+          else {
+            go(index + 1)
+            setStage(1) // a staged slide always starts at its first stage
+          }
           e.preventDefault()
           break
+        }
         case 'ArrowLeft':
-        case 'PageUp':
-          go(index - 1)
+        case 'PageUp': {
+          const tot = stagesFor(index)
+          if (tot && stage > 1) setStage((s) => s - 1)
+          else {
+            const pi = Math.max(0, index - 1)
+            go(pi)
+            setStage(stagesFor(pi) || 1) // stepping back into a staged slide shows it complete
+          }
           e.preventDefault()
           break
+        }
         case 'f':
           toggleFullscreen()
           break
@@ -148,7 +171,7 @@ export default function Deck() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [index, N, goto, armed, phase, cloudMode, go, toggleFullscreen, confirmPhase, flashToast])
+  }, [index, stage, N, goto, armed, phase, cloudMode, go, toggleFullscreen, confirmPhase, flashToast])
 
   return (
     <div className="deck">
@@ -163,6 +186,7 @@ export default function Deck() {
       <div className="deck__progress" style={{ width: `${((index + 1) / N) * 100}%` }} />
       <div className="deck__num">
         {index + 1} / {N}
+        {stagesFor(index) ? ` · ${stage}/${stagesFor(index)}` : ''}
       </div>
       <div className="deck__phase">
         {kind === 'local' ? '○ local' : '● live'} · {PHASE_LABEL[phase]}
@@ -189,8 +213,9 @@ function buildSlides(ctx: {
   cloudMode: 'cloud' | 'cards'
   phase: Phase
   backendError: boolean
+  stage: number
 }) {
-  const { items, verdicts, participants, cloudMode, backendError } = ctx
+  const { items, verdicts, participants, cloudMode, backendError, stage } = ctx
   const total = items.length
   const distinct = aggregate(items, 'annoy').length
   const works = aggregate(items, 'works').slice(0, 6)
@@ -275,25 +300,15 @@ function buildSlides(ctx: {
       <p className="small">Two answers each. I'm writing them down.</p>
     </Slide>,
 
-    // 5 — How I use it
-    <Slide key="s5">
-      <h2 className="h">A real brief: the Supplier Portal</h2>
-      <p className="body">
-        The problem: the suppliers of our customers don't know this exists, and don't know it's
-        free for them.
-      </p>
+    // 5 — The Supplier Portal, explained (animated, DIAGRAM_INDEX)
+    <Slide key="s-diagram" live>
+      <div className="diagramslide">
+        <p className="kicker">A real brief · the Supplier Portal</p>
+        <SupplierStory stage={stage} />
+      </div>
     </Slide>,
 
-    // 6 — Who you're actually writing to
-    <Slide key="s6">
-      <h2 className="h">Not our customer. Our customer's supplier.</h2>
-      <p className="body">
-        They didn't ask for this. They assume it will cost them money. They have no relationship
-        with FOSS.
-      </p>
-    </Slide>,
-
-    // 7 — Where it goes wrong (credibility slide, visually distinct)
+    // 6 — Where it goes wrong (credibility slide, visually distinct)
     <Slide key="s7" tone="warn">
       <p className="kicker kicker--warn">Where it goes wrong</p>
       <h2 className="h">

@@ -252,6 +252,14 @@
   margin-bottom: 4px;
 }
 
+/* ── Diagram slide (animated supplier story) ──────────────────────────────── */
+.diagramslide {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 2vh, 26px);
+}
+
 /* ── Slide 10: results ────────────────────────────────────────────────────── */
 .results {
   width: 100%;
