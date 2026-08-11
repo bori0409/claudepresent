@@ -235,6 +235,29 @@ function BreakTimer({ minutes = 7 }: { minutes?: number }) {
   )
 }
 
+// ── Click-to-copy prompt ─────────────────────────────────────────────────────
+function CopyPrompt({ children }: { children: string }) {
+  const [copied, setCopied] = useState(false)
+  return (
+    <button
+      type="button"
+      className={`prompt ${copied ? 'prompt--copied' : ''}`}
+      onClick={() => {
+        navigator.clipboard
+          ?.writeText(children)
+          .then(() => {
+            setCopied(true)
+            window.setTimeout(() => setCopied(false), 1600)
+          })
+          .catch(() => {})
+      }}
+    >
+      <span className="prompt__hint">{copied ? 'Copied ✓' : 'Click to copy'}</span>
+      <span className="prompt__text">{children}</span>
+    </button>
+  )
+}
+
 // ── Slide construction ───────────────────────────────────────────────────────
 function buildSlides(ctx: {
   items: ReturnType<typeof useItems>
@@ -358,6 +381,32 @@ function buildSlides(ctx: {
         web section · social post aimed at customers.
       </p>
       <Brief />
+    </Slide>,
+
+    // Demo · the skill — same prompt cold vs with iqx-designer loaded
+    <Slide key="s-demo1">
+      <p className="kicker">Demo · cold chat, then with the skill loaded</p>
+      <h2 className="h h--tight">Same prompt, twice.</h2>
+      <CopyPrompt>Design a hero section for a page introducing our supplier portal.</CopyPrompt>
+      <p className="small">
+        A skill is a folder of instructions — brand, facts, rules — loaded before you type. You can
+        build one for anything: your tone of voice, campaign formats, your team's checklist.
+      </p>
+    </Slide>,
+
+    // Demo · Claude Design on our design system
+    <Slide key="s-demo2">
+      <p className="kicker">Demo · Claude Design, on our brand</p>
+      <h2 className="h h--tight">Three directions, on our design system.</h2>
+      <CopyPrompt>
+        A landing page section introducing the IQX Supplier Portal. The reader is a supplier who
+        assumes it will cost them money. Lead with: it's covered by their customer's licence. Give
+        me three different directions.
+      </CopyPrompt>
+      <p className="small">
+        It read our brand once at setup — every project starts from our colours and type. Iterate
+        by commenting on elements; export to PPTX or PDF when it's worth keeping.
+      </p>
     </Slide>,
 
     // Break — refresh, then go make things

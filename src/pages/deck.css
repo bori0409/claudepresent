@@ -252,6 +252,47 @@
   margin-bottom: 4px;
 }
 
+/* ── Click-to-copy prompt (demo slides) ───────────────────────────────────── */
+.prompt {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 62rem;
+  text-align: left;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: clamp(1rem, 1.4vw, 1.5rem);
+  line-height: 1.5;
+  color: var(--fg-primary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-surface);
+  padding: 1.5rem 1.6rem;
+  margin-top: clamp(12px, 2vh, 22px);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.prompt:hover {
+  border-color: var(--accent);
+}
+.prompt__hint {
+  position: absolute;
+  top: 0.7rem;
+  right: 1rem;
+  font-family: var(--font);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.prompt--copied .prompt__hint {
+  color: var(--accent);
+}
+.prompt__text {
+  display: block;
+  padding-top: 0.6rem;
+}
+
 /* ── Break slide (countdown) ──────────────────────────────────────────────── */
 .brk {
   display: flex;
